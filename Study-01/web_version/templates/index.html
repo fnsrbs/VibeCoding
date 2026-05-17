@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Handwritten Digit Recognizer</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Handwritten Digit Recognizer</h1>
+      <p class="subtitle">SVM (RBF kernel) &nbsp;|&nbsp; Dataset: sklearn digits &nbsp;|&nbsp; Accuracy: <strong>{{ accuracy }}</strong></p>
+    </header>
+
+    <main>
+      <!-- Left panel: canvas + buttons + prediction -->
+      <section class="panel-left">
+        <p class="panel-title">Draw a digit (0 – 9) :</p>
+        <canvas id="drawCanvas" width="280" height="280"></canvas>
+        <div class="btn-row">
+          <button id="btnPredict" class="btn btn-predict">Predict</button>
+          <button id="btnClear"   class="btn btn-clear">Clear</button>
+        </div>
+        <div id="prediction" class="prediction">?</div>
+      </section>
+
+      <!-- Right panel: confidence chart + 8×8 preview -->
+      <section class="panel-right">
+        <p class="panel-title">Confidence per digit :</p>
+        <canvas id="chartCanvas"></canvas>
+        <p class="preview-label">8 × 8 input sent to model :</p>
+        <canvas id="previewCanvas" width="72" height="72"></canvas>
+      </section>
+    </main>
+  </div>
+
+  <script src="/static/js/main.js"></script>
+</body>
+</html>
