@@ -1,0 +1,32 @@
+{
+  "exportedAt": "2026-05-22T10:00:00.000Z",
+  "totalCount": 21,
+  "rankings": [
+    { "nickname": "지민", "score": 185, "category": "한국사",   "date": "2026. 5. 18.", "savedAt": 1779148800000 },
+    { "nickname": "지민", "score": 170, "category": "과학",     "date": "2026. 5. 19.", "savedAt": 1779235200000 },
+    { "nickname": "지민", "score": 160, "category": "지리",     "date": "2026. 5. 20.", "savedAt": 1779321600000 },
+    { "nickname": "지민", "score": 175, "category": "일반상식", "date": "2026. 5. 21.", "savedAt": 1779408000000 },
+    { "nickname": "지민", "score": 680, "category": "all",      "date": "2026. 5. 22.", "savedAt": 1779494400000 },
+
+    { "nickname": "수현", "score":  90, "category": "한국사",   "date": "2026. 5. 5.",  "savedAt": 1778025600000 },
+    { "nickname": "수현", "score": 120, "category": "한국사",   "date": "2026. 5. 14.", "savedAt": 1778803200000 },
+    { "nickname": "수현", "score": 140, "category": "한국사",   "date": "2026. 5. 21.", "savedAt": 1779408000000 },
+    { "nickname": "수현", "score": 130, "category": "과학",     "date": "2026. 5. 20.", "savedAt": 1779321600000 },
+    { "nickname": "수현", "score": 100, "category": "지리",     "date": "2026. 5. 22.", "savedAt": 1779494400000 },
+
+    { "nickname": "태오", "score": 100, "category": "한국사",   "date": "2026. 5. 10.", "savedAt": 1778457600000 },
+    { "nickname": "태오", "score":  95, "category": "과학",     "date": "2026. 5. 15.", "savedAt": 1778889600000 },
+    { "nickname": "태오", "score":  90, "category": "과학",     "date": "2026. 5. 20.", "savedAt": 1779321600000 },
+    { "nickname": "태오", "score":  40, "category": "지리",     "date": "2026. 5. 17.", "savedAt": 1779062400000 },
+    { "nickname": "태오", "score": 110, "category": "일반상식", "date": "2026. 5. 20.", "savedAt": 1779321600000 },
+
+    { "nickname": "하은", "score":  50, "category": "한국사",   "date": "2026. 5. 8.",  "savedAt": 1778284800000 },
+    { "nickname": "하은", "score":  45, "category": "과학",     "date": "2026. 5. 12.", "savedAt": 1778630400000 },
+    { "nickname": "하은", "score":  55, "category": "한국사",   "date": "2026. 5. 20.", "savedAt": 1779321600000 },
+
+    { "nickname": "준혁", "score": 115, "category": "지리",     "date": "2026. 5. 3.",  "savedAt": 1777852800000 },
+    { "nickname": "준혁", "score": 130, "category": "일반상식", "date": "2026. 5. 10.", "savedAt": 1778457600000 },
+
+    { "nickname": "민서", "score":  80, "category": "과학",     "date": "2026. 5. 21.", "savedAt": 1779408000000 }
+  ]
+}

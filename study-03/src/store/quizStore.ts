@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import type { Category, CategoryFilter, QuizSession, RankingEntry, Screen } from '../types/quiz'
 import { questions, getQuestionsByCategory } from '../data/questions'
 
@@ -25,6 +25,43 @@ function calcPoints(correct: boolean, elapsedMs: number, newComboCount: number):
   if (newComboCount >= 3) pts += 10
   return pts
 }
+
+// localStorage에 QuotaExceededError 발생 시 오래된 항목 자동 삭제
+const safeStorage = createJSONStorage(() => ({
+  getItem: (name: string) => {
+    try {
+      return localStorage.getItem(name)
+    } catch {
+      return null
+    }
+  },
+  setItem: (name: string, value: string) => {
+    try {
+      localStorage.setItem(name, value)
+    } catch {
+      try {
+        const parsed = JSON.parse(value)
+        if (parsed.state?.rankings) {
+          parsed.state.rankings = (parsed.state.rankings as RankingEntry[]).slice(0, 20)
+          localStorage.setItem(name, JSON.stringify(parsed))
+        }
+      } catch {
+        try {
+          localStorage.removeItem(name)
+        } catch {
+          // ignore
+        }
+      }
+    }
+  },
+  removeItem: (name: string) => {
+    try {
+      localStorage.removeItem(name)
+    } catch {
+      // ignore
+    }
+  },
+}))
 
 export const useQuizStore = create<QuizState>()(
   persist(
@@ -133,6 +170,7 @@ export const useQuizStore = create<QuizState>()(
     }),
     {
       name: 'quiz-storage',
+      storage: safeStorage,
       partialize: (state) => ({ rankings: state.rankings }),
     },
   ),

@@ -9,7 +9,8 @@
       "Bash(Get-Content \"C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-user-Desktop-VibeCoding-Study-03\\\\2c908b71-2c67-4a93-bd5d-1ea8c3ea92d9\\\\tasks\\\\bq9lrtu73.output\")",
       "Bash(curl *)",
       "Bash(npx playwright *)",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(npx tsc *)"
     ]
   }
 }

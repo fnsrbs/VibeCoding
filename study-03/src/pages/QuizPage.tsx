@@ -6,15 +6,13 @@ import { useTimer } from '../hooks/useTimer'
 import CircularTimer from '../components/CircularTimer'
 import ProgressBar from '../components/ProgressBar'
 import Toast from '../components/Toast'
-import type { CategoryFilter } from '../types/quiz'
-
 const TIMER_SECONDS = 30
 const LABELS = ['A', 'B', 'C', 'D'] as const
 
 export default function QuizPage() {
   const navigate = useNavigate()
   const { category } = useParams<{ category: string }>()
-  const { session, startQuiz, answerQuestion, nextQuestion, finishQuiz } = useQuizStore()
+  const { session, answerQuestion, nextQuestion, finishQuiz } = useQuizStore()
   const { comboCount } = useScore()
 
   const [selected, setSelected] = useState<number | null>(null)
@@ -22,11 +20,13 @@ export default function QuizPage() {
   const [toast, setToast] = useState({ message: '', type: 'correct' as 'correct' | 'incorrect', visible: false })
 
   const selectedRef = useRef<number | null>(null)
+  const handleAnswerRef = useRef<(idx: number) => void>(() => {})
+  const handleNextRef = useRef<() => void>(() => {})
 
-  // 직접 URL 접근 / 새로고침 시 퀴즈 재시작
+  // 새로고침·직접 URL 접근 시 홈으로 리다이렉트
   useEffect(() => {
-    if (!session && category) {
-      startQuiz(decodeURIComponent(category) as CategoryFilter)
+    if (!session) {
+      navigate('/', { replace: true, state: { refreshed: true } })
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -46,7 +46,6 @@ export default function QuizPage() {
 
   const { remaining, reset } = useTimer(TIMER_SECONDS, handleExpire)
 
-  // 문제 전환 시 리셋
   useEffect(() => {
     if (!session) return
     setSelected(null)
@@ -56,12 +55,7 @@ export default function QuizPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.currentIndex])
 
-  if (!session) return null
-
-  const question = session.questions[session.currentIndex]
-  const isLast = session.currentIndex === session.questions.length - 1
-
-  const handleAnswer = (idx: number) => {
+  const handleAnswer = useCallback((idx: number) => {
     if (selectedRef.current !== null) return
     selectedRef.current = idx
     setSelected(idx)
@@ -72,54 +66,91 @@ export default function QuizPage() {
     } else {
       showToast('❌ 오답!', 'incorrect')
     }
-  }
+  }, [answerQuestion, showToast])
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
+    if (!session) return
+    const isLast = session.currentIndex === session.questions.length - 1
     if (isLast) {
       finishQuiz()
       navigate('/result')
     } else {
       nextQuestion()
     }
-  }
+  }, [session, finishQuiz, nextQuestion, navigate])
+
+  // 최신 핸들러를 ref에 유지 (키보드 핸들러의 stale closure 방지)
+  handleAnswerRef.current = handleAnswer
+  handleNextRef.current = handleNext
+
+  // 키보드 단축키: 1/2/3/4로 보기 선택, Enter로 다음 문제
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const keyMap: Record<string, number> = { '1': 0, '2': 1, '3': 2, '4': 3 }
+      if (e.key in keyMap) {
+        handleAnswerRef.current(keyMap[e.key])
+      } else if (e.key === 'Enter' && selectedRef.current !== null) {
+        handleNextRef.current()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
+  if (!session) return null
+
+  const question = session.questions[session.currentIndex]
+  const isLast = session.currentIndex === session.questions.length - 1
+  const categoryLabel = session.category === 'all' ? '전체 도전' : session.category
+
+  const difficultyLabel = { easy: '쉬움', medium: '보통', hard: '어려움' }[question.difficulty]
+  const difficultyColor = {
+    easy: 'bg-emerald-100 text-emerald-700',
+    medium: 'bg-amber-100 text-amber-700',
+    hard: 'bg-red-100 text-red-700',
+  }[question.difficulty]
 
   const getOptionClass = (idx: number) => {
     const base = 'border-2 rounded-xl px-4 py-3 text-left font-medium transition-all flex items-center gap-3 w-full'
-    if (selected === null) return `${base} bg-white border-gray-200 hover:border-blue-400 hover:shadow-sm cursor-pointer`
-    if (idx === question.correct_index) return `${base} bg-green-50 border-green-500`
-    if (idx === selected && selected >= 0) return `${base} bg-red-50 border-red-400`
-    return `${base} bg-white border-gray-100 opacity-50`
+    if (selected === null) {
+      return `${base} bg-white border-slate-200 hover:border-indigo-400 hover:scale-105 hover:shadow-sm cursor-pointer`
+    }
+    if (idx === question.correct_index) {
+      return `${base} bg-emerald-50 border-emerald-500`
+    }
+    if (idx === selected && selected >= 0) {
+      return `${base} bg-red-50 border-red-400 animate-shake`
+    }
+    return `${base} bg-white border-slate-100 opacity-40`
   }
 
   const getLabelClass = (idx: number) => {
     const base = 'w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0'
-    if (selected === null) return `${base} bg-gray-100 text-gray-600`
-    if (idx === question.correct_index) return `${base} bg-green-500 text-white`
+    if (selected === null) return `${base} bg-slate-100 text-slate-600`
+    if (idx === question.correct_index) return `${base} bg-emerald-500 text-white`
     if (idx === selected && selected >= 0) return `${base} bg-red-500 text-white`
-    return `${base} bg-gray-100 text-gray-300`
+    return `${base} bg-slate-100 text-slate-300`
   }
 
-  const difficultyLabel = { easy: '쉬움', medium: '보통', hard: '어려움' }[question.difficulty]
-  const difficultyColor = {
-    easy: 'bg-green-100 text-green-700',
-    medium: 'bg-yellow-100 text-yellow-700',
-    hard: 'bg-red-100 text-red-700',
-  }[question.difficulty]
-
-  const categoryLabel = session.category === 'all' ? '전체 도전' : session.category
+  const getOptionIcon = (idx: number) => {
+    if (selected === null) return LABELS[idx]
+    if (idx === question.correct_index) return '✓'
+    if (idx === selected && selected >= 0) return '✗'
+    return LABELS[idx]
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 animate-fade-in">
       <Toast message={toast.message} type={toast.type} visible={toast.visible} />
 
-      <div className="w-full max-w-xl bg-white rounded-3xl shadow-lg p-6 flex flex-col gap-4">
+      <div className="w-full max-w-md md:max-w-2xl bg-white rounded-3xl shadow-lg p-6 flex flex-col gap-4">
         {/* 헤더 */}
         <div className="flex justify-between items-center text-sm">
-          <span className="font-bold text-blue-600">{categoryLabel}</span>
-          <span className="text-gray-500 font-medium">
+          <span className="font-bold text-indigo-600">{categoryLabel}</span>
+          <span className="text-slate-500 font-medium">
             {session.currentIndex + 1} / {session.questions.length}
           </span>
-          <span className="font-bold text-gray-700">점수: {session.score}</span>
+          <span className="font-bold text-slate-700">점수: {session.score}</span>
         </div>
 
         <ProgressBar current={session.currentIndex + 1} total={session.questions.length} />
@@ -137,23 +168,25 @@ export default function QuizPage() {
               </span>
             )}
           </div>
+          <p className="text-xs text-slate-400 hidden md:block">1~4 키로 선택, Enter로 다음</p>
         </div>
 
         {/* 문제 */}
-        <p className="text-lg font-semibold text-gray-800 leading-relaxed">
+        <p className="text-lg font-semibold text-slate-800 leading-relaxed">
           Q{session.currentIndex + 1}. {question.question_text}
         </p>
 
         {/* 보기 */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2" role="group" aria-label="보기">
           {question.options.map((opt, idx) => (
             <button
               key={idx}
               onClick={() => handleAnswer(idx)}
               disabled={selected !== null}
+              aria-label={`보기 ${idx + 1}: ${opt}${selected !== null && idx === question.correct_index ? ' (정답)' : ''}`}
               className={getOptionClass(idx)}
             >
-              <span className={getLabelClass(idx)}>{LABELS[idx]}</span>
+              <span className={getLabelClass(idx)}>{getOptionIcon(idx)}</span>
               <span>{opt}</span>
             </button>
           ))}
@@ -164,18 +197,20 @@ export default function QuizPage() {
           <div
             className={`rounded-xl p-4 text-sm border ${
               feedback.correct
-                ? 'bg-green-50 border-green-200 text-green-800'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
                 : 'bg-red-50 border-red-200 text-red-800'
             }`}
           >
-            <p className="font-bold mb-1">
-              {feedback.correct
-                ? `✅ 정답! (+${feedback.points}점)`
-                : selected === -1
-                  ? `⏰ 시간 초과! 정답: ${LABELS[question.correct_index]}`
-                  : `❌ 오답! 정답: ${LABELS[question.correct_index]}`}
+            <p className="font-bold mb-1 flex items-center gap-1">
+              {feedback.correct ? (
+                <><span aria-hidden="true">✅</span> 정답! (+{feedback.points}점)</>
+              ) : selected === -1 ? (
+                <><span aria-hidden="true">⏰</span> 시간 초과! 정답: {LABELS[question.correct_index]}</>
+              ) : (
+                <><span aria-hidden="true">❌</span> 오답! 정답: {LABELS[question.correct_index]}</>
+              )}
             </p>
-            <p className="text-gray-600 text-xs">{question.explanation}</p>
+            <p className="text-slate-600 text-xs">{question.explanation}</p>
           </div>
         )}
 
@@ -183,12 +218,18 @@ export default function QuizPage() {
         {selected !== null && (
           <button
             onClick={handleNext}
-            className="bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 active:scale-95 transition-all"
+            aria-label={isLast ? '결과 보기' : '다음 문제'}
+            className="bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 active:scale-95 transition-all"
           >
             {isLast ? '결과 보기 →' : '다음 문제 →'}
           </button>
         )}
       </div>
+
+      {/* 키보드 단축키 힌트 (모바일 숨김) */}
+      <p className="mt-3 text-xs text-slate-400 md:hidden">
+        {category && decodeURIComponent(category)}
+      </p>
     </div>
   )
 }
