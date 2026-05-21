@@ -1,0 +1,75 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #1e1e2e;
+  color: #fff;
+  font-family: Helvetica, Arial, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app { max-width: 780px; width: 100%; padding: 24px 20px; }
+
+header { text-align: center; margin-bottom: 24px; }
+header h1 { font-size: 1.6rem; font-weight: bold; }
+header .subtitle { color: #a0a0b0; font-size: 0.9rem; margin-top: 6px; }
+header .subtitle strong { color: #fff; }
+
+main {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.panel-title { font-size: 1rem; margin-bottom: 8px; }
+
+/* Left panel */
+.panel-left { display: flex; flex-direction: column; align-items: center; }
+
+#drawCanvas {
+  background: #000;
+  border: 2px solid #555577;
+  border-radius: 4px;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.btn-row { display: flex; gap: 12px; margin: 12px 0; }
+
+.btn {
+  padding: 10px 24px;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.btn:hover { opacity: 0.85; }
+.btn-predict { background: #4ade80; color: #1e1e2e; }
+.btn-clear   { background: #f87171; color: #fff; }
+
+.prediction {
+  font-size: 6rem;
+  font-weight: bold;
+  color: #4ade80;
+  line-height: 1;
+  min-width: 2ch;
+  text-align: center;
+  margin-top: 8px;
+}
+
+/* Right panel */
+.panel-right { display: flex; flex-direction: column; align-items: center; }
+
+#chartCanvas { width: 340px !important; height: 300px !important; }
+
+.preview-label { color: #a0a0b0; font-size: 0.85rem; margin: 10px 0 4px; }
+
+#previewCanvas {
+  image-rendering: pixelated;
+  border: 1px solid #555577;
+}
